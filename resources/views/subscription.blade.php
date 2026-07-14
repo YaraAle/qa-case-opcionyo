@@ -7,22 +7,36 @@ Suscripción
 </h1>
 
 
-<form>
+@if(session('message'))
+
+<p>
+{{ session('message') }}
+</p>
+
+@endif
+
+
+
+<form method="POST" action="/payment">
+
+@csrf
+
 
 <label>
 Número tarjeta
 </label>
 
+
 <input 
-name="card"
-placeholder="4242424242424242"
+    name="card"
+    placeholder="4242424242424242"
 >
 
 
 <br><br>
 
 
-<button>
+<button type="submit">
 Pagar
 </button>
 

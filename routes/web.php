@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AppController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\StripeWebhookController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -40,6 +42,16 @@ Route::middleware('auth')->group(function () {
         [AppointmentController::class,'cancel']
     );
 
+    Route::post(
+        '/payment',
+        [PaymentController::class,'pay']
+    )->name('payment');
+
 });
+
+Route::post(
+    '/stripe/webhook',
+    [StripeWebhookController::class,'handle']
+);
 
 require __DIR__.'/auth.php';
