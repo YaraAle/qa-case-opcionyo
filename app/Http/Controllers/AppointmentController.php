@@ -12,76 +12,64 @@ class AppointmentController extends Controller
 
     public function store(Request $request)
     {
-
         $request->validate([
-            'specialist_id'=>'required',
-            'scheduled_at'=>'required'
+            'specialist_id' => 'required|exists:specialists,id',
+            'scheduled_at' => 'required|date|after:now'
         ]);
 
+        try {
+            $appointment = \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+                // Ensure specialist is available
+                $specialist = Specialist::find($request->specialist_id);
+                if (!$specialist || !$specialist->available) {
+                    throw new \Exception('Especialista no disponible');
+                }
 
-        $exists = Appointment::where(
-            'specialist_id',
-            $request->specialist_id
-        )
-        ->where(
-            'scheduled_at',
-            $request->scheduled_at
-        )
-        ->where(
-            'status',
-            'scheduled'
-        )
-        ->exists();
+                // Check and lock slot
+                $exists = Appointment::where('specialist_id', $request->specialist_id)
+                    ->where('scheduled_at', $request->scheduled_at)
+                    ->where('status', 'scheduled')
+                    ->lockForUpdate()
+                    ->exists();
 
+                if ($exists) {
+                    throw new \Exception('Horario ocupado');
+                }
 
-        if($exists){
+                return Appointment::create([
+                    'user_id' => Auth::id(),
+                    'specialist_id' => $request->specialist_id,
+                    'scheduled_at' => $request->scheduled_at,
+                    'status' => 'scheduled'
+                ]);
+            });
 
             return redirect()
-            ->back()
-            ->with(
-                'message',
-                'Horario ocupado'
-            );
+                ->back()
+                ->with('message', 'Sesión creada correctamente');
 
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('message', $e->getMessage());
         }
-
-
-        $appointment = Appointment::create([
-
-            //'user_id'=>auth()->id(),
-            'user_id'=>Auth::id(),
-
-            'specialist_id'=>$request->specialist_id,
-
-            'scheduled_at'=>$request->scheduled_at,
-
-            'status'=>'scheduled'
-
-        ]);
-
-
-        return redirect()
-        ->back()
-        ->with(
-            'message',
-            'Sesión creada correctamente'
-        );
-
     }
-
 
     public function cancel(Appointment $appointment)
     {
+        if ($appointment->user_id !== Auth::id()) {
+            return response()->json([
+                'message' => 'No autorizado para cancelar esta sesión'
+            ], 403);
+        }
 
         $appointment->update([
-            'status'=>'cancelled'
+            'status' => 'cancelled'
         ]);
-
 
         return response()->json([
-            'message'=>'Sesión cancelada'
+            'message' => 'Sesión cancelada'
         ]);
-
     }
 
 }

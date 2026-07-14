@@ -13,11 +13,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'password' => bcrypt('password'), // Ensure known password
+        ]);
+
+        \App\Models\Specialist::create([
+            'name' => 'Dr. Ana Perez',
+            'specialty' => 'Psicología',
+            'available' => true,
+        ]);
+
+        \App\Models\Specialist::create([
+            'name' => 'Dr. Carlos Gomez',
+            'specialty' => 'Psiquiatría',
+            'available' => false,
         ]);
     }
 }

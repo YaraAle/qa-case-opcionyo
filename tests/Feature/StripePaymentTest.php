@@ -66,38 +66,52 @@ test('usuario recibe rechazo con tarjeta declinada', function () {
 
 
 
-test('webhook actualiza suscripcion correctamente', function () {
+test('webhook actualiza suscripcion correctamente con firma valida', function () {
 
     $subscription = Subscription::create([
-
-        'user_id'=>User::factory()->create()->id,
-
-        'status'=>'pending',
-
-        'amount'=>100
-
+        'user_id' => User::factory()->create()->id,
+        'stripe_id' => 'mock_tx_123',
+        'status' => 'pending',
+        'amount' => 100
     ]);
 
-
-    $response = $this
+    $response = $this->withHeaders([
+            'X-Stripe-Signature' => 'mock_stripe_signature_secret'
+        ])
         ->post('/stripe/webhook', [
-
-            'subscription_id'=>$subscription->id,
-
-            'status'=>'active'
-
+            'stripe_id' => 'mock_tx_123',
+            'status' => 'active'
         ]);
-
 
     $response->assertStatus(200);
 
+    $this->assertDatabaseHas('subscriptions', [
+        'id' => $subscription->id,
+        'status' => 'active'
+    ]);
+});
 
-    $this->assertDatabaseHas(
-        'subscriptions',
-        [
-            'id'=>$subscription->id,
-            'status'=>'active'
-        ]
-    );
+test('webhook rechaza peticion con firma invalida', function () {
 
+    $subscription = Subscription::create([
+        'user_id' => User::factory()->create()->id,
+        'stripe_id' => 'mock_tx_123',
+        'status' => 'pending',
+        'amount' => 100
+    ]);
+
+    $response = $this->withHeaders([
+            'X-Stripe-Signature' => 'invalid_signature'
+        ])
+        ->post('/stripe/webhook', [
+            'stripe_id' => 'mock_tx_123',
+            'status' => 'active'
+        ]);
+
+    $response->assertStatus(401);
+
+    $this->assertDatabaseHas('subscriptions', [
+        'id' => $subscription->id,
+        'status' => 'pending'
+    ]);
 });

@@ -3,7 +3,10 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "test:laravel": "php artisan test",
+        "test:e2e": "npx playwright test",
+        "test:all": "php artisan migrate:fresh --seed --force & php artisan test & npx playwright test"
     },
     "devDependencies": {
         "@playwright/test": "^1.61.1",

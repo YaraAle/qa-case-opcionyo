@@ -15,6 +15,15 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('appointments')" :active="request()->routeIs('appointments')">
+                        {{ __('Agendar') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('subscription')" :active="request()->routeIs('subscription')">
+                        {{ __('Suscripción') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('meeting')" :active="request()->routeIs('meeting')">
+                        {{ __('Videollamada') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -69,6 +78,15 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('appointments')" :active="request()->routeIs('appointments')">
+                {{ __('Agendar') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('subscription')" :active="request()->routeIs('subscription')">
+                {{ __('Suscripción') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('meeting')" :active="request()->routeIs('meeting')">
+                {{ __('Videollamada') }}
             </x-responsive-nav-link>
         </div>
 

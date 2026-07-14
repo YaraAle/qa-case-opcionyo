@@ -7,6 +7,12 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:8000',
     headless: true,
+    launchOptions: {
+      args: [
+        '--use-fake-ui-for-media-stream',
+        '--use-fake-device-for-media-stream'
+      ]
+    }
   },
 
   webServer: {
