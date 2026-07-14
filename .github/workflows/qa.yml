@@ -4,60 +4,60 @@ on:
   push:
     branches:
       - main
-
   pull_request:
     branches:
       - main
 
 
 jobs:
-
   tests:
 
     runs-on: ubuntu-latest
 
-
     steps:
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.4'
 
 
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress
+    - name: Install Composer dependencies
+      run: composer install --no-progress --prefer-dist --optimize-autoloader
 
 
-      - name: Prepare Laravel
-        run: |
-          cp .env.example .env
-          php artisan key:generate
-          touch database/database.sqlite
-          php artisan migrate --force
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
 
 
-      - name: Run Laravel tests
-        run: php artisan test
+    - name: Install Node dependencies
+      run: npm install
 
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
+    - name: Build frontend
+      run: npm run build
 
 
-      - name: Install Node dependencies
-        run: npm install
+    - name: Prepare Laravel
+      run: |
+        cp .env.example .env
+        php artisan key:generate
+        php artisan migrate --force
 
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+    - name: Run Laravel tests
+      run: php artisan test
 
 
-      - name: Run Playwright tests
-        run: npx playwright test
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps
+
+
+    - name: Run Playwright tests
+      run: npx playwright test
